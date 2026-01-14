@@ -1,0 +1,11 @@
+langchain==1.2.3
+langgraph==1.0.6
+langchain-openai==1.1.7
+langgraph-checkpoint-postgres==3.0.3
+psycopg[binary]==3.3.2
+psycopg-pool==3.3.0
+python-dotenv
+chromadb
+langgraph-cli[inmem]
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
