@@ -14,7 +14,9 @@ SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 from .chroma_setup import collection
 from .tools import search_policies
 
-from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage
+from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg_pool import ConnectionPool
 import psycopg
@@ -25,18 +27,20 @@ with psycopg.connect(SUPABASE_DB_URL, autocommit=True) as setup_conn:
 pool = ConnectionPool(conninfo=SUPABASE_DB_URL, max_size=5)
 checkpointer = PostgresSaver(pool)
 
-agent = create_agent(
-    model="openai:gpt-4o-mini",
-    tools=[search_policies],
-    system_prompt="""
-    You are an institutional policy specialist. 
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+SYSTEM_PROMPT = """You are an institutional policy specialist. 
 Always rely on the context supplied from the Chroma knowledge base to answer user questions. 
 When the context is relevant, quote or paraphrase it precisely and mention the policy title or section. 
 If the context is insufficient or missing, say so and suggest what additional information is needed—do not guess. 
-Keep answers concise, professional, and focused on the user’s question about university policies.
-    """,
+Keep answers concise, professional, and focused on the user's question about university policies.
+Remember previous messages in our conversation and refer back to them when relevant."""
+
+agent = create_react_agent(
+    model=llm,
+    tools=[search_policies],
     checkpointer=checkpointer,
-    name="chatgpt_clone"
+    prompt=SystemMessage(content=SYSTEM_PROMPT),
 )
 
 def get_relevant_context(query: str) -> str:
@@ -57,16 +61,26 @@ def chat(user_input: str, thread_id: str = "default") -> str:
     context = get_relevant_context(user_input)
     
     if context:
-        enriched_input = f"Context:\n{context}\n\nUser Question:\n{user_input}"
+        enriched_input = f"Context from knowledge base:\n{context}\n\nUser Question:\n{user_input}"
     else:
         enriched_input = user_input
         
     config = {"configurable": {"thread_id": thread_id}}
     result = agent.invoke(
-        {"messages": [{"role": "user", "content": enriched_input}]},
+        {"messages": [("user", enriched_input)]},
         config
     )
     return result["messages"][-1].content
+
+
+def delete_thread(thread_id: str) -> None:
+    """Delete all checkpoints for a given thread_id from the database."""
+    with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
+            cur.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,))
+            cur.execute("DELETE FROM checkpoint_blobs WHERE thread_id = %s", (thread_id,))
+        conn.commit()
 
 if __name__ == "__main__":
     print("ChatGPT Clone - Type 'quit' to exit\n")

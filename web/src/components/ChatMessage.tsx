@@ -1,9 +1,10 @@
 'use client'
 
 import { Copy, ThumbsUp, ThumbsDown, RotateCcw, MoreHorizontal } from 'lucide-react'
+import { Response } from '@/components/ui/response'
 
 interface Message {
-  id: number
+  id: string
   role: 'user' | 'assistant'
   content: string
 }
@@ -26,11 +27,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="prose prose-invert max-w-none">
-              <p className="text-text-primary text-[15px] leading-relaxed whitespace-pre-wrap">
-                {message.content}
-              </p>
-            </div>
+            <Response className="text-text-primary text-[15px] leading-relaxed">
+              {message.content}
+            </Response>
             <div className="flex items-center gap-1 pt-1">
               <button className="p-1.5 hover:bg-hover-bg rounded-lg transition-colors">
                 <Copy size={16} className="text-text-secondary" />

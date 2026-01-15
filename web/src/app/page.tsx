@@ -1,16 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import Sidebar from '@/components/Sidebar'
 import ChatMessage from '@/components/ChatMessage'
 import ChatInput from '@/components/ChatInput'
+import { ShimmeringText } from '@/components/ui/shimmering-text'
 import { useChat } from '@/context/ChatContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+const loadingPhrases = [
+  'Agent is thinking...',
+  'Generating response...',
+  'Almost there...',
+]
+
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [phraseIndex, setPhraseIndex] = useState(0)
   const { chats, activeChat, addMessage, createNewChat, isLoading, setIsLoading } = useChat()
+
+  useEffect(() => {
+    if (!isLoading) {
+      setPhraseIndex(0)
+      return
+    }
+    
+    const interval = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % loadingPhrases.length)
+    }, 3000)
+    
+    return () => clearInterval(interval)
+  }, [isLoading])
 
   const handleSendMessage = async (content: string, chatId?: string) => {
     const threadId = chatId || activeChat?.id
@@ -88,17 +110,24 @@ export default function Home() {
                   ))
                 )}
                 {isLoading && (
-                  <div className="flex gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-medium">AI</span>
-                    </div>
-                    <div className="flex-1 pt-1">
-                      <div className="animate-pulse flex space-x-1">
-                        <div className="w-2 h-2 bg-text-secondary rounded-full"></div>
-                        <div className="w-2 h-2 bg-text-secondary rounded-full"></div>
-                        <div className="w-2 h-2 bg-text-secondary rounded-full"></div>
-                      </div>
-                    </div>
+                  <div className="mb-6">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={phraseIndex}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ShimmeringText 
+                          text={loadingPhrases[phraseIndex]} 
+                          className="text-base"
+                          duration={1.5}
+                          color="#a1a1aa"
+                          shimmerColor="#ffffff"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
                 )}
               </div>

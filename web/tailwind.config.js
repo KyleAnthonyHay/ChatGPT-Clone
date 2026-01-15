@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './node_modules/streamdown/dist/*.js',
   ],
   theme: {
     extend: {
@@ -19,5 +20,7 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }
