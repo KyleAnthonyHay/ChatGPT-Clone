@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 
 
 class ChatRequest(BaseModel):
@@ -9,3 +9,38 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    response_time_ms: int
+    context_used: bool
+    tool_calls: list[str]
+    error_occurred: bool
+    error_type: Optional[str] = None
+
+
+class FeedbackRequest(BaseModel):
+    message_id: str
+    thread_id: Optional[str] = None
+    feedback: Optional[Literal["up", "down"]] = None
+    message_content: str
+    session_id: Optional[str] = None
+    response_time_ms: Optional[int] = None
+    context_used: Optional[bool] = None
+    tool_calls: Optional[list[str]] = None
+    error_occurred: bool = False
+    error_type: Optional[str] = None
+
+
+class CreateChatRequest(BaseModel):
+    chat_id: str
+    title: str
+
+
+class MessageRequest(BaseModel):
+    message_id: str
+    chat_id: str
+    role: Literal["user", "assistant"]
+    content: str
+    response_time_ms: Optional[int] = None
+    context_used: Optional[bool] = None
+    tool_calls: Optional[list[str]] = None
+    error_occurred: bool = False
+    error_type: Optional[str] = None

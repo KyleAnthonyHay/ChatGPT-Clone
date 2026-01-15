@@ -16,9 +16,10 @@ import {
 
 interface ChatInputProps {
   onSend: (message: string) => void
+  disabled?: boolean
 }
 
-export default function ChatInput({ onSend }: ChatInputProps) {
+export default function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [input, setInput] = useState('')
   const [showToolkit, setShowToolkit] = useState(false)
   const toolkitRef = useRef<HTMLDivElement>(null)
@@ -40,7 +41,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (input.trim()) {
+    if (input.trim() && !disabled) {
       onSend(input.trim())
       setInput('')
     }
@@ -128,11 +129,11 @@ export default function ChatInput({ onSend }: ChatInputProps) {
             <button
               type="submit"
               className={`p-2 rounded-full transition-colors ${
-                hasText 
+                hasText && !disabled
                   ? 'bg-white hover:bg-gray-200' 
-                  : 'bg-white hover:bg-gray-200'
+                  : 'bg-gray-500 cursor-not-allowed'
               }`}
-              disabled={!hasText}
+              disabled={!hasText || disabled}
               aria-label="Send"
             >
               <ArrowUp size={20} className="text-black" />
