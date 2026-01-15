@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from chroma_setup import client, collection
+from .chroma_setup import client, collection
 
 CHUNKS_DIR = Path("Richmond_Policies_Cleaned/chunked")
 MAX_DOCUMENT_BYTES = 16000  # leave headroom under 16,384-byte Chroma limit

@@ -1,5 +1,5 @@
 from langchain_core.tools import tool
-from chroma_setup import collection
+from .chroma_setup import collection
 
 
 @tool

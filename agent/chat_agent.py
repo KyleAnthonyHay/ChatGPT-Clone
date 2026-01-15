@@ -1,7 +1,8 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / ".env")
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
@@ -10,8 +11,8 @@ os.environ["LANGSMITH_TRACING"] = os.getenv("LANGSMITH_TRACING", "false")
 
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
-from chroma_setup import collection
-from tools import search_policies
+from .chroma_setup import collection
+from .tools import search_policies
 
 from langchain.agents import create_agent
 from langgraph.checkpoint.postgres import PostgresSaver
