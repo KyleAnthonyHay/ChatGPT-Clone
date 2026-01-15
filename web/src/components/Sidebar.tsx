@@ -6,7 +6,6 @@ import {
   PanelLeft,
   ChevronRight,
   ChevronDown,
-  MessageSquare,
   SidebarIcon,
   MoreHorizontal,
   Upload,
@@ -20,7 +19,12 @@ import {
   Clock,
   Settings,
   LifeBuoy,
-  LogOut
+  LogOut,
+  SquarePen,
+  Search,
+  ImageIcon,
+  LayoutGrid,
+  Code2
 } from 'lucide-react'
 import { useChat, Chat } from '@/context/ChatContext'
 
@@ -243,32 +247,52 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-2">
-          <button 
-            onClick={createNewChat}
-            className="w-full flex items-center gap-3 px-3 py-3 hover:bg-hover-bg rounded-lg transition-colors text-left"
-          >
-            <MessageSquare size={18} className="text-text-secondary" />
-            <span className="text-sm text-text-primary">New chat</span>
-          </button>
+          {/* Main action buttons */}
+          <div className="space-y-1 mt-2">
+            <button 
+              onClick={createNewChat}
+              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left"
+            >
+              <SquarePen size={18} className="text-text-primary" />
+              <span className="text-sm text-text-primary">New chat</span>
+            </button>
 
-          <div className="mt-4">
-            <button className="w-full flex items-center justify-between px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+              <Search size={18} className="text-text-primary" />
+              <span className="text-sm text-text-primary">Search chats</span>
+            </button>
+
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+              <ImageIcon size={18} className="text-text-primary" />
+              <span className="text-sm text-text-primary">Images</span>
+            </button>
+
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+              <LayoutGrid size={18} className="text-text-primary" />
+              <span className="text-sm text-text-primary">Apps</span>
+            </button>
+
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+              <Code2 size={18} className="text-text-primary" />
+              <span className="text-sm text-text-primary">Codex</span>
+            </button>
+          </div>
+
+          {/* Expandable sections */}
+          <div className="mt-6 space-y-1">
+            <button className="w-full flex items-center gap-1 px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors">
               <span className="text-sm text-text-secondary">GPTs</span>
               <ChevronRight size={16} className="text-text-secondary" />
             </button>
-          </div>
 
-          <div className="mt-1">
-            <button className="w-full flex items-center justify-between px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors">
+            <button className="w-full flex items-center gap-1 px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors">
               <span className="text-sm text-text-secondary">Projects</span>
               <ChevronRight size={16} className="text-text-secondary" />
             </button>
-          </div>
 
-          <div className="mt-1">
             <button 
               onClick={() => setChatsExpanded(!chatsExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors"
+              className="w-full flex items-center gap-1 px-3 py-2 hover:bg-hover-bg rounded-lg transition-colors"
             >
               <span className="text-sm text-text-secondary">Your chats</span>
               {chatsExpanded ? (

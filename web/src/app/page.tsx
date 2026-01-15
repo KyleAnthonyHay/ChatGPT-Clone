@@ -54,11 +54,22 @@ export default function Home() {
       if (!response.ok) throw new Error('Failed to get response')
 
       const data = await response.json()
-      addMessage({ role: 'assistant', content: data.reply }, threadId)
+      addMessage({ 
+        role: 'assistant', 
+        content: data.reply,
+        metadata: {
+          response_time_ms: data.response_time_ms,
+          context_used: data.context_used,
+          tool_calls: data.tool_calls,
+          error_occurred: data.error_occurred,
+          error_type: data.error_type,
+        }
+      }, threadId)
     } catch (error) {
       addMessage({ 
         role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
+        content: 'Sorry, I encountered an error. Please try again.',
+        metadata: { error_occurred: true, error_type: 'NetworkError' }
       }, threadId)
     } finally {
       setIsLoading(false)
@@ -106,7 +117,7 @@ export default function Home() {
                   </div>
                 ) : (
                   activeChat?.messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
+                    <ChatMessage key={message.id} message={message} threadId={activeChat.id} />
                   ))
                 )}
                 {isLoading && (

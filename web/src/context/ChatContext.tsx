@@ -2,10 +2,19 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 
+export interface MessageMetadata {
+  response_time_ms?: number
+  context_used?: boolean
+  tool_calls?: string[]
+  error_occurred?: boolean
+  error_type?: string | null
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
+  metadata?: MessageMetadata
 }
 
 export interface Chat {
