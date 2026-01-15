@@ -2,3 +2,20 @@ Richmond_Policies_Cleaned/
 .env
 venv/
 __pycache__/
+node_modules/
+.next/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+
+# Python
+*.pyc
+.pytest_cache/
+
+# Chroma DB (if persisting locally)
+chroma_db/
