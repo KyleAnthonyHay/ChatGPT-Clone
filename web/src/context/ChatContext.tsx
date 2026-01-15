@@ -1,6 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export interface MessageMetadata {
   response_time_ms?: number
@@ -34,6 +36,7 @@ interface ChatContextType {
   deleteChat: (chatId: string) => Promise<void>
   isLoading: boolean
   setIsLoading: (loading: boolean) => void
+  isLoadingChats: boolean
 }
 
 const ChatContext = createContext<ChatContextType | null>(null)
@@ -46,8 +49,70 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([])
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingChats, setIsLoadingChats] = useState(true)
 
   const activeChat = chats.find(c => c.id === activeChatId) || null
+
+  useEffect(() => {
+    loadChats()
+  }, [])
+
+  const loadChats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/chats`)
+      if (response.ok) {
+        const data = await response.json()
+        const loadedChats: Chat[] = data.map((chat: any) => ({
+          id: chat.id,
+          title: chat.title,
+          messages: chat.messages || [],
+          createdAt: chat.created_at ? new Date(chat.created_at) : new Date(),
+        }))
+        setChats(loadedChats)
+        if (loadedChats.length > 0) {
+          setActiveChatId(loadedChats[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load chats:', error)
+    } finally {
+      setIsLoadingChats(false)
+    }
+  }
+
+  const saveMessageToDB = async (message: Message, chatId: string) => {
+    try {
+      await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message_id: message.id,
+          chat_id: chatId,
+          role: message.role,
+          content: message.content,
+          response_time_ms: message.metadata?.response_time_ms,
+          context_used: message.metadata?.context_used,
+          tool_calls: message.metadata?.tool_calls,
+          error_occurred: message.metadata?.error_occurred,
+          error_type: message.metadata?.error_type,
+        }),
+      })
+    } catch (error) {
+      console.error('Failed to save message:', error)
+    }
+  }
+
+  const saveChatToDB = async (chatId: string, title: string) => {
+    try {
+      await fetch(`${API_URL}/chats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, title }),
+      })
+    } catch (error) {
+      console.error('Failed to save chat:', error)
+    }
+  }
 
   const createNewChat = useCallback(() => {
     const newChat: Chat = {
@@ -58,6 +123,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
     setChats(prev => [newChat, ...prev])
     setActiveChatId(newChat.id)
+    saveChatToDB(newChat.id, newChat.title)
     return newChat.id
   }, [])
 
@@ -82,10 +148,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         message.role === 'user' && 
         updatedMessages.filter(m => m.role === 'user').length === 1
 
+      const newTitle = shouldUpdateTitle 
+        ? message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '') 
+        : chat.title
+
+      saveMessageToDB(newMessage, targetChatId)
+      if (shouldUpdateTitle) {
+        saveChatToDB(targetChatId, newTitle)
+      }
+
       return {
         ...chat,
         messages: updatedMessages,
-        title: shouldUpdateTitle ? message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '') : chat.title,
+        title: newTitle,
       }
     }))
   }, [activeChatId])
@@ -97,11 +172,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const deleteChat = useCallback(async (chatId: string) => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     try {
-      await fetch(`${API_URL}/chat/${chatId}`, { method: 'DELETE' })
+      await fetch(`${API_URL}/chats/${chatId}`, { method: 'DELETE' })
     } catch (error) {
-      console.error('Failed to delete chat memory:', error)
+      console.error('Failed to delete chat:', error)
     }
     
     setChats(prev => {
@@ -124,6 +198,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       deleteChat,
       isLoading,
       setIsLoading,
+      isLoadingChats,
     }}>
       {children}
     </ChatContext.Provider>

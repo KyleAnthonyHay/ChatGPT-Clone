@@ -19,9 +19,26 @@ class ChatResponse(BaseModel):
 class FeedbackRequest(BaseModel):
     message_id: str
     thread_id: Optional[str] = None
-    feedback: Optional[Literal['up', 'down']] = None
+    feedback: Optional[Literal["up", "down"]] = None
     message_content: str
     session_id: Optional[str] = None
+    response_time_ms: Optional[int] = None
+    context_used: Optional[bool] = None
+    tool_calls: Optional[list[str]] = None
+    error_occurred: bool = False
+    error_type: Optional[str] = None
+
+
+class CreateChatRequest(BaseModel):
+    chat_id: str
+    title: str
+
+
+class MessageRequest(BaseModel):
+    message_id: str
+    chat_id: str
+    role: Literal["user", "assistant"]
+    content: str
     response_time_ms: Optional[int] = None
     context_used: Optional[bool] = None
     tool_calls: Optional[list[str]] = None

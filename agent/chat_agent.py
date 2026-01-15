@@ -33,6 +33,31 @@ with psycopg.connect(SUPABASE_DB_URL, autocommit=True) as setup_conn:
             created_at TIMESTAMP DEFAULT NOW()
         )
     """)
+    setup_conn.execute("""
+        CREATE TABLE IF NOT EXISTS chats (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        )
+    """)
+    setup_conn.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id TEXT PRIMARY KEY,
+            chat_id TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+            content TEXT NOT NULL,
+            response_time_ms INTEGER,
+            context_used BOOLEAN,
+            tool_calls TEXT,
+            error_occurred BOOLEAN DEFAULT FALSE,
+            error_type TEXT,
+            created_at TIMESTAMP DEFAULT NOW(),
+            CONSTRAINT fk_chat FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+        )
+    """)
+    setup_conn.execute("CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id)")
+    setup_conn.execute("CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at)")
     setup_conn.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS session_id TEXT")
     setup_conn.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS response_time_ms INTEGER")
     setup_conn.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS context_used BOOLEAN")
