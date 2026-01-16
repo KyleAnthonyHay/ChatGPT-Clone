@@ -64,29 +64,29 @@ export default function ChatMessage({ message, threadId }: ChatMessageProps) {
   }
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-6 message-enter`}>
-      <div className={`max-w-2xl ${isUser ? 'order-1' : 'order-1'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 md:mb-6 message-enter`}>
+      <div className={`max-w-[85%] md:max-w-2xl ${isUser ? 'order-1' : 'order-1'}`}>
         {isUser ? (
-          <div className="bg-user-bubble rounded-3xl px-5 py-3">
-            <p className="text-text-primary text-[15px] leading-relaxed">
+          <div className="bg-user-bubble rounded-2xl md:rounded-3xl px-4 md:px-5 py-2.5 md:py-3">
+            <p className="text-text-primary text-sm md:text-[15px] leading-relaxed">
               {message.content}
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <Response className="text-text-primary text-[15px] leading-relaxed">
+          <div className="space-y-2 md:space-y-3">
+            <Response className="text-text-primary text-sm md:text-[15px] leading-relaxed">
               {message.content}
             </Response>
-            <div className="flex items-center gap-1 pt-1">
+            <div className="flex items-center gap-0.5 md:gap-1 pt-1">
               <button 
                 onClick={handleCopy}
                 className="p-1.5 hover:bg-hover-bg rounded-lg transition-colors"
                 title="Copy to clipboard"
               >
                 {copied ? (
-                  <Check size={16} className="text-green-500" />
+                  <Check size={14} className="text-green-500 md:w-4 md:h-4" />
                 ) : (
-                  <Copy size={16} className="text-text-secondary" />
+                  <Copy size={14} className="text-text-secondary md:w-4 md:h-4" />
                 )}
               </button>
               <button 
@@ -96,7 +96,7 @@ export default function ChatMessage({ message, threadId }: ChatMessageProps) {
                 }`}
                 title="Good response"
               >
-                <ThumbsUp size={16} className="text-text-secondary" fill={feedback === 'up' ? 'currentColor' : 'none'} />
+                <ThumbsUp size={14} className="text-text-secondary md:w-4 md:h-4" fill={feedback === 'up' ? 'currentColor' : 'none'} />
               </button>
               <button 
                 onClick={() => handleFeedback('down')}
@@ -105,13 +105,13 @@ export default function ChatMessage({ message, threadId }: ChatMessageProps) {
                 }`}
                 title="Bad response"
               >
-                <ThumbsDown size={16} className="text-text-secondary" fill={feedback === 'down' ? 'currentColor' : 'none'} />
+                <ThumbsDown size={14} className="text-text-secondary md:w-4 md:h-4" fill={feedback === 'down' ? 'currentColor' : 'none'} />
               </button>
-              <button className="p-1.5 hover:bg-hover-bg rounded-lg transition-colors">
+              <button className="p-1.5 hover:bg-hover-bg rounded-lg transition-colors hidden md:block">
                 <RotateCcw size={16} className="text-text-secondary" />
               </button>
               <button className="p-1.5 hover:bg-hover-bg rounded-lg transition-colors">
-                <MoreHorizontal size={16} className="text-text-secondary" />
+                <MoreHorizontal size={14} className="text-text-secondary md:w-4 md:h-4" />
               </button>
             </div>
           </div>

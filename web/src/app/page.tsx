@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Menu } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import ChatMessage from '@/components/ChatMessage'
 import ChatInput from '@/components/ChatInput'
@@ -9,6 +10,19 @@ import { ShimmeringText } from '@/components/ui/shimmering-text'
 import { useChat } from '@/context/ChatContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  return isMobile
+}
 
 const apiFetch = (endpoint: string, options: RequestInit = {}) => {
   return fetch(`${API_URL}${endpoint}`, {
@@ -27,9 +41,14 @@ const loadingPhrases = [
 ]
 
 export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const isMobile = useIsMobile()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [phraseIndex, setPhraseIndex] = useState(0)
   const { chats, activeChat, addMessage, createNewChat, isLoading, setIsLoading } = useChat()
+
+  useEffect(() => {
+    setSidebarOpen(!isMobile)
+  }, [isMobile])
 
   useEffect(() => {
     if (!isLoading) {
@@ -94,22 +113,35 @@ export default function Home() {
   const hasChats = chats.length > 0
 
   return (
-    <div className="flex h-screen">
-      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onToggle={() => setSidebarOpen(!sidebarOpen)} 
+        isMobile={isMobile}
+      />
 
       <main
-        className={`flex-1 flex flex-col transition-all duration-200 ${
-          sidebarOpen ? 'ml-64' : 'ml-0'
+        className={`flex-1 flex flex-col transition-all duration-200 min-w-0 ${
+          !isMobile && sidebarOpen ? 'md:ml-64' : 'ml-0'
         }`}
       >
         {hasChats ? (
           <>
-            <header className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
-              <div className={`flex items-center gap-2 ${sidebarOpen ? '' : 'ml-12'}`}>
+            <header className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
+              <div className="flex items-center gap-2">
+                {(isMobile || !sidebarOpen) && (
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="p-2 -ml-2 hover:bg-hover-bg rounded-lg transition-colors"
+                    aria-label="Open menu"
+                  >
+                    <Menu size={20} className="text-text-secondary" />
+                  </button>
+                )}
                 <span className="text-text-primary font-medium">ChatGPT</span>
-                <span className="text-text-secondary text-sm">5.2 Instant</span>
+                <span className="text-text-secondary text-sm hidden sm:inline">5.2 Instant</span>
                 <svg
-                  className="w-4 h-4 text-text-secondary"
+                  className="w-4 h-4 text-text-secondary hidden sm:block"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -119,11 +151,11 @@ export default function Home() {
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-3xl mx-auto py-8 px-4">
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <div className="max-w-3xl mx-auto py-6 md:py-8 px-3 md:px-4">
                 {activeChat?.messages.length === 0 ? (
-                  <div className="text-center text-text-secondary mt-20">
-                    <p className="text-lg">How can I help you today?</p>
+                  <div className="text-center text-text-secondary mt-12 md:mt-20">
+                    <p className="text-base md:text-lg">How can I help you today?</p>
                   </div>
                 ) : (
                   activeChat?.messages.map((message) => (
@@ -154,15 +186,24 @@ export default function Home() {
               </div>
             </div>
 
-            <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+            <ChatInput onSend={handleSendMessage} disabled={isLoading} isMobile={isMobile} />
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center">
-            <h1 className="text-2xl text-text-primary font-medium mb-4">
+          <div className="flex-1 flex flex-col items-center justify-center px-4">
+            {isMobile && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="absolute top-3 left-3 p-2 hover:bg-hover-bg rounded-lg transition-colors"
+                aria-label="Open menu"
+              >
+                <Menu size={20} className="text-text-secondary" />
+              </button>
+            )}
+            <h1 className="text-xl md:text-2xl text-text-primary font-medium mb-4 text-center">
               What's on your mind today?
             </h1>
             <div className="w-full max-w-3xl">
-              <ChatInput onSend={handleWelcomeSend} disabled={isLoading} />
+              <ChatInput onSend={handleWelcomeSend} disabled={isLoading} isMobile={isMobile} />
             </div>
           </div>
         )}

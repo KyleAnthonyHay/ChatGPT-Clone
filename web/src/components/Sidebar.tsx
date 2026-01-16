@@ -172,9 +172,10 @@ function ChatItem({ chat, isActive, onSelect, onDelete, onRename }: ChatItemProp
 interface SidebarProps {
   isOpen: boolean
   onToggle: () => void
+  isMobile?: boolean
 }
 
-export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarProps) {
   const [chatsExpanded, setChatsExpanded] = useState(true)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [profileMenuPosition, setProfileMenuPosition] = useState({ bottom: 0, left: 0 })
@@ -203,6 +204,16 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
     setShowProfileMenu(!showProfileMenu)
   }
 
+  const handleChatSelect = (chatId: string) => {
+    selectChat(chatId)
+    if (isMobile) onToggle()
+  }
+
+  const handleNewChat = () => {
+    createNewChat()
+    if (isMobile) onToggle()
+  }
+
   const profileMenuItems = [
     { icon: Sparkles, label: 'Upgrade plan', action: () => {} },
     { icon: Clock, label: 'Personalization', action: () => {} },
@@ -214,7 +225,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <>
-      {!isOpen && (
+      {!isOpen && !isMobile && (
         <button
           onClick={onToggle}
           className="fixed top-3 left-3 p-2 hover:bg-hover-bg rounded-lg transition-colors z-50"
@@ -224,9 +235,19 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </button>
       )}
 
+      {isMobile && isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 transition-opacity"
+          onClick={onToggle}
+          aria-hidden="true"
+        />
+      )}
+
       <aside
-        className={`sidebar-transition fixed left-0 top-0 h-full bg-sidebar-bg flex flex-col z-40 ${
-          isOpen ? 'w-64' : 'w-0 overflow-hidden'
+        className={`fixed left-0 top-0 h-full bg-sidebar-bg flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+          isMobile 
+            ? `w-72 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : `sidebar-transition ${isOpen ? 'w-64' : 'w-0 overflow-hidden'}`
         }`}
       >
         <div className="flex items-center justify-between p-3">
@@ -250,7 +271,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           {/* Main action buttons */}
           <div className="space-y-1 mt-2">
             <button 
-              onClick={createNewChat}
+              onClick={handleNewChat}
               className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left"
             >
               <SquarePen size={18} className="text-text-primary" />
@@ -314,7 +335,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       key={chat.id}
                       chat={chat}
                       isActive={activeChat?.id === chat.id}
-                      onSelect={() => selectChat(chat.id)}
+                      onSelect={() => handleChatSelect(chat.id)}
                       onDelete={() => deleteChat(chat.id)}
                       onRename={(newTitle) => updateChatTitle(chat.id, newTitle)}
                     />
