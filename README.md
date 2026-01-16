@@ -19,10 +19,10 @@ A full-stack ChatGPT clone application with a FastAPI backend and Next.js fronte
    ```bash
    # Example .env file
    OPENAI_API_KEY=your_api_key_here
-   ALLOWED_ORIGINS=http://localhost:3000
+   ALLOWED_ORIGINS=http://localhost:3000,https://chat-gpt-clone-delta-ten.vercel.app
    ```
 
-2. **Build and run the backend:**
+2. **Build and run the backend with Docker Compose:**
    ```bash
    docker-compose up --build
    ```
@@ -33,6 +33,38 @@ A full-stack ChatGPT clone application with a FastAPI backend and Next.js fronte
    ```bash
    curl http://localhost:8000/health
    ```
+
+### Exposing the API with ngrok
+
+To expose your local API endpoint publicly (useful for testing with external services or mobile apps):
+
+1. **Install ngrok:**
+   - Download from [ngrok.com](https://ngrok.com/download) or install via package manager:
+     ```bash
+     # macOS
+     brew install ngrok
+     
+     # Or download directly from ngrok.com
+     ```
+
+2. **Start ngrok tunnel:**
+   ```bash
+   ngrok http 8000
+   ```
+
+3. **Update ALLOWED_ORIGINS:**
+   Add the ngrok URL to your `.env` file or docker-compose environment:
+   ```bash
+   ALLOWED_ORIGINS=http://localhost:3000,https://chat-gpt-clone-delta-ten.vercel.app,https://your-ngrok-url.ngrok.io
+   ```
+
+4. **Restart Docker Compose:**
+   ```bash
+   docker-compose down
+   docker-compose up
+   ```
+
+   Your API will now be accessible via the ngrok URL (e.g., `https://abc123.ngrok.io`)
 
 ### Frontend (Web)
 
