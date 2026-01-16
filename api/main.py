@@ -9,7 +9,7 @@ from .db_service import ChatDBService
 
 app = FastAPI(title="ChatGPT Clone API")
 
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+allowed_origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")]
 
 app.add_middleware(
     CORSMiddleware,

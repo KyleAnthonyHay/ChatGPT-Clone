@@ -6,7 +6,7 @@ services:
     env_file:
       - ./agent/.env
     environment:
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,https://chat-gpt-clone-delta-ten.vercel.app}
     dns:
       - 8.8.8.8
       - 8.8.4.4

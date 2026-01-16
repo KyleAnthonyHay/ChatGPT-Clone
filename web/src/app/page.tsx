@@ -10,6 +10,16 @@ import { useChat } from '@/context/ChatContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+const apiFetch = (endpoint: string, options: RequestInit = {}) => {
+  return fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'ngrok-skip-browser-warning': 'true',
+    },
+  })
+}
+
 const loadingPhrases = [
   'Agent is thinking...',
   'Generating response...',
@@ -42,7 +52,7 @@ export default function Home() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/chat`, {
+      const response = await apiFetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

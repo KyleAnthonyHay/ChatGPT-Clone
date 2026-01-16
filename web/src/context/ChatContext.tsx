@@ -4,6 +4,16 @@ import { createContext, useContext, useState, useCallback, ReactNode, useEffect 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+const apiFetch = (endpoint: string, options: RequestInit = {}) => {
+  return fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'ngrok-skip-browser-warning': 'true',
+    },
+  })
+}
+
 export interface MessageMetadata {
   response_time_ms?: number
   context_used?: boolean
@@ -59,7 +69,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const loadChats = async () => {
     try {
-      const response = await fetch(`${API_URL}/chats`)
+      const response = await apiFetch('/chats')
       if (response.ok) {
         const data = await response.json()
         const loadedChats: Chat[] = data.map((chat: any) => ({
@@ -82,7 +92,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const saveMessageToDB = async (message: Message, chatId: string) => {
     try {
-      await fetch(`${API_URL}/messages`, {
+      await apiFetch('/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -104,7 +114,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const saveChatToDB = async (chatId: string, title: string) => {
     try {
-      await fetch(`${API_URL}/chats`, {
+      await apiFetch('/chats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: chatId, title }),
@@ -173,7 +183,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const deleteChat = useCallback(async (chatId: string) => {
     try {
-      await fetch(`${API_URL}/chats/${chatId}`, { method: 'DELETE' })
+      await apiFetch(`/chats/${chatId}`, { method: 'DELETE' })
     } catch (error) {
       console.error('Failed to delete chat:', error)
     }
