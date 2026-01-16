@@ -8,9 +8,14 @@
   padding: 0;
 }
 
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background-color: #212121;
   color: #ececec;
+  overscroll-behavior: none;
 }
 
 ::-webkit-scrollbar {
@@ -30,6 +35,13 @@ body {
   background: #4a4a4a;
 }
 
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    width: 0;
+    display: none;
+  }
+}
+
 .message-enter {
   animation: messageSlide 0.3s ease-out;
 }
@@ -47,4 +59,14 @@ body {
 
 .sidebar-transition {
   transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
 }
