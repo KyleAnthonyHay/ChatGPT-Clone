@@ -153,15 +153,9 @@ export default function Home() {
 
             <div className="flex-1 overflow-y-auto min-h-0">
               <div className="max-w-3xl mx-auto py-6 md:py-8 px-3 md:px-4">
-                {activeChat?.messages.length === 0 ? (
-                  <div className="text-center text-text-secondary mt-12 md:mt-20">
-                    <p className="text-base md:text-lg">How can I help you today?</p>
-                  </div>
-                ) : (
-                  activeChat?.messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} threadId={activeChat.id} />
-                  ))
-                )}
+                {activeChat?.messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} threadId={activeChat.id} />
+                ))}
                 {isLoading && (
                   <div className="mb-6">
                     <AnimatePresence mode="wait">
