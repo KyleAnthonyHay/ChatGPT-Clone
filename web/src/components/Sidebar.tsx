@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { 
   PanelLeft,
   ChevronRight,
@@ -27,6 +29,7 @@ import {
   Code2
 } from 'lucide-react'
 import { useChat, Chat } from '@/context/ChatContext'
+import SearchChatsModal from './SearchChatsModal'
 
 interface ChatItemProps {
   chat: Chat
@@ -176,8 +179,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarProps) {
+  const router = useRouter()
   const [chatsExpanded, setChatsExpanded] = useState(true)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [showSearchModal, setShowSearchModal] = useState(false)
   const [profileMenuPosition, setProfileMenuPosition] = useState({ bottom: 0, left: 0 })
   const profileButtonRef = useRef<HTMLButtonElement>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
@@ -206,11 +211,13 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
 
   const handleChatSelect = (chatId: string) => {
     selectChat(chatId)
+    router.push('/')
     if (isMobile) onToggle()
   }
 
   const handleNewChat = () => {
     createNewChat()
+    router.push('/')
     if (isMobile) onToggle()
   }
 
@@ -278,25 +285,28 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
               <span className="text-sm text-text-primary">New chat</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+            <button 
+              onClick={() => setShowSearchModal(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left"
+            >
               <Search size={18} className="text-text-primary" />
               <span className="text-sm text-text-primary">Search chats</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+            <Link href="/images" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
               <ImageIcon size={18} className="text-text-primary" />
               <span className="text-sm text-text-primary">Images</span>
-            </button>
+            </Link>
 
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+            <Link href="/apps" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
               <LayoutGrid size={18} className="text-text-primary" />
               <span className="text-sm text-text-primary">Apps</span>
-            </button>
+            </Link>
 
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
+            <a href="https://openai.com/codex/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-hover-bg rounded-lg transition-colors text-left">
               <Code2 size={18} className="text-text-primary" />
               <span className="text-sm text-text-primary">Codex</span>
-            </button>
+            </a>
           </div>
 
           {/* Expandable sections */}
@@ -424,6 +434,13 @@ export default function Sidebar({ isOpen, onToggle, isMobile = false }: SidebarP
           </div>
         )}
       </aside>
+
+      <SearchChatsModal
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
+        onNewChat={handleNewChat}
+        onSelectChat={handleChatSelect}
+      />
     </>
   )
 }
